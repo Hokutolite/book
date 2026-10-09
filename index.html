@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電子書展示</title>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #2b2b2b;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .status-container {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #loading-status {
+      font-size: 16px;
+      color: #00d2d3;
+      font-weight: bold;
+    }
+
+    .flipbook-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #flipbook {
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      display: none; /* 渲染完成前隱藏 */
+    }
+
+    .page {
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .page canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <!-- 1. 引入本機 PDF.js (傳統 JS) -->
+  <script src="./build/pdf.min.js"></script>
+  <!-- 2. 引入本機 Page Flip 翻頁套件 -->
+  <script src="./page-flip.browser.js"></script>
+</head>
+<body>
+
+  <div class="status-container">
+    <div id="loading-status">正在自動載入電子書 (index.pdf)...</div>
+  </div>
+
+  <div class="flipbook-wrapper">
+    <div id="flipbook"></div>
+  </div>
+
+  <script>
+    // 指定 Worker 檔案路徑
+    pdfjsLib.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.js';
+
+    const loadingStatus = document.getElementById('loading-status');
+    const flipbookContainer = document.getElementById('flipbook');
+    
+    // 設定預設要載入的 PDF 檔名
+    const DEFAULT_PDF_URL = './index.pdf';
+
+    let pageFlip = null;
+
+    // 網頁開啟後自動執行的函式
+    async function loadBook() {
+      try {
+        loadingStatus.innerText = '讀取 index.pdf 中...';
+
+        // 1. 自動從同目錄 fetch 讀取 index.pdf
+        const response = await fetch(DEFAULT_PDF_URL);
+        if (!response.ok) {
+          throw new Error(`無法讀取檔案，HTTP 狀態碼: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+
+        // 2. 解析 PDF
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        loadingStatus.innerText = `解析完成 (共 ${totalPages} 頁)，正在繪製頁面...`;
+
+        // 取得第一頁尺寸做為電子書基準比例
+        const firstPage = await pdfDoc.getPage(1);
+        const viewport = firstPage.getViewport({ scale: 1 });
+        const pageWidth = viewport.width;
+        const pageHeight = viewport.height;
+
+        // 3. 逐頁渲染成 Canvas DOM
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+          loadingStatus.innerText = `正在渲染第 ${pageNum} / ${totalPages} 頁...`;
+          
+          const page = await pdfDoc.getPage(pageNum);
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          
+          // scale: 1.5 可提升清晰度
+          const renderViewport = page.getViewport({ scale: 1.5 });
+          canvas.width = renderViewport.width;
+          canvas.height = renderViewport.height;
+
+          await page.render({
+            canvasContext: context,
+            viewport: renderViewport
+          }).promise;
+
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'page';
+          pageDiv.appendChild(canvas);
+          flipbookContainer.appendChild(pageDiv);
+        }
+
+        loadingStatus.innerText = '初始化翻頁效果中...';
+
+        // 4. 初始化 PageFlip 翻頁動畫
+        pageFlip = new St.PageFlip(flipbookContainer, {
+          width: pageWidth,
+          height: pageHeight,
+          size: 'fixed',
+          minWidth: 300,
+          maxWidth: 1000,
+          minHeight: 400,
+          maxHeight: 1400,
+          maxShadowOpacity: 0.5,
+          showCover: true, // 第一頁獨立為封面
+          mobileScrollSupport: false
+        });
+
+        const pages = flipbookContainer.querySelectorAll('.page');
+        pageFlip.loadFromHTML(pages);
+
+        // 渲染完成，顯示電子書並隱藏提示
+        flipbookContainer.style.display = 'block';
+        loadingStatus.innerText = '';
+
+      } catch (err) {
+        console.error(err);
+        loadingStatus.innerText = '載入失敗！請確認 index.pdf 檔案是否存在於同目錄下。';
+      }
+    }
+
+    // 頁面載入完成後自動執行
+    window.addEventListener('DOMContentLoaded', loadBook);
+  </script>
+</body>
+</html>
