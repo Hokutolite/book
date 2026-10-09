@@ -1,167 +1,362 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>電子書展示</title>
-  
+  <meta name="theme-color" content="#111925">
+  <title>畢業紀念冊｜電子書</title>
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111925;
+      --panel: rgba(24, 35, 49, .78);
+      --line: rgba(226, 205, 157, .22);
+      --gold: #d9c18a;
+      --gold-bright: #f1dfad;
+      --text: #f5f2eb;
+      --muted: #a9b2bf;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
     body {
       margin: 0;
-      padding: 20px;
-      background-color: #2b2b2b;
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 50% 34%, rgba(64, 83, 103, .30), transparent 48%),
+        radial-gradient(ellipse at 50% 100%, rgba(155, 125, 69, .10), transparent 42%),
+        linear-gradient(145deg, #0b111a 0%, #172230 48%, #101721 100%);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
+      overflow-x: hidden;
     }
-
-    .status-container {
-      margin-bottom: 15px;
-      text-align: center;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
     }
-
-    #loading-status {
-      font-size: 16px;
-      color: #00d2d3;
-      font-weight: bold;
-    }
-
-    .flipbook-wrapper {
+    .topbar {
+      width: min(1180px, calc(100% - 44px));
+      margin: 0 auto;
+      padding: 25px 0 14px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      width: 100%;
-      margin-top: 10px;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
     }
-
-    #flipbook {
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
-      display: none; /* 渲染完成前隱藏 */
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 38px; height: 38px; flex: 0 0 38px;
+      border: 1px solid rgba(217,193,138,.65);
+      border-radius: 11px;
+      display: grid; place-items: center;
+      color: var(--gold-bright);
+      font-family: Georgia, serif;
+      font-size: 20px;
+      box-shadow: inset 0 0 18px rgba(217,193,138,.08), 0 0 22px rgba(217,193,138,.05);
     }
-
-    .page {
-      background-color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .brand-title { font-size: 14px; letter-spacing: .16em; font-weight: 650; }
+    .brand-subtitle { margin-top: 4px; font-size: 10px; color: var(--muted); letter-spacing: .22em; }
+    .top-note { font-size: 11px; color: var(--muted); letter-spacing: .12em; }
+    .intro { text-align: center; padding: 16px 18px 4px; position: relative; z-index: 1; }
+    .eyebrow {
+      color: var(--gold); font-size: 10px; letter-spacing: .38em;
+      text-transform: uppercase; margin-bottom: 11px;
     }
-
-    .page canvas {
-      width: 100%;
-      height: 100%;
+    h1 {
+      font-weight: 500; font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: .18em; margin: 0; text-indent: .18em;
+    }
+    .intro p { color: var(--muted); font-size: 12px; letter-spacing: .08em; margin: 12px 0 0; }
+    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 18px auto 0; }
+    .ornament::before, .ornament::after { content: ""; width: 38px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .ornament::after { transform: scaleX(-1); }
+    .ornament span { width: 5px; height: 5px; transform: rotate(45deg); background: var(--gold); }
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 10px 18px 20px; position: relative; z-index: 1; }
+    .reader-shell {
+      width: min(1180px, 100%);
+      display: flex; flex-direction: column; align-items: center;
+      border: 1px solid rgba(255,255,255,.055);
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
+      box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
+      padding: 20px 22px 16px;
+      min-height: 240px;
+    }
+    .reader-topline {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; color: var(--muted); font-size: 11px; letter-spacing: .08em;
+      margin-bottom: 13px;
+    }
+    .live-status { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(217,193,138,.5); }
+    #loading-status { text-align: center; color: #d7c79f; font-size: 13px; padding: 70px 15px; }
+    .loader {
+      width: 28px; height: 28px; margin: 0 auto 17px; border-radius: 50%;
+      border: 2px solid rgba(217,193,138,.18); border-top-color: var(--gold);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .book-stage {
+      width: 100%; min-height: 250px; display: flex; align-items: center; justify-content: center;
+      position: relative; padding: 2px 0 14px;
+    }
+    .book-stage::before {
+      content: ""; position: absolute; width: 65%; height: 35px; bottom: 0;
+      background: rgba(0,0,0,.42); filter: blur(28px); border-radius: 50%;
+    }
+    #flipbook { display: none; position: relative; z-index: 1; }
+    .page { background: #fff; overflow: hidden; }
+    .page canvas { display: block; width: 100%; height: 100%; }
+    .controls {
+      width: 100%; display: flex; align-items: center; justify-content: center;
+      gap: 12px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07);
+      flex-wrap: wrap;
+    }
+    .control-btn {
+      min-width: 42px; height: 40px; padding: 0 14px;
+      border: 1px solid rgba(217,193,138,.25); border-radius: 11px;
+      color: var(--text); background: rgba(255,255,255,.045);
+      font: inherit; font-size: 12px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .2s, border-color .2s, transform .2s;
+    }
+    .control-btn:hover:not(:disabled) { background: rgba(217,193,138,.12); border-color: rgba(217,193,138,.6); transform: translateY(-1px); }
+    .control-btn:focus-visible, .page-input:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+    .control-btn:disabled { opacity: .32; cursor: not-allowed; }
+    .control-btn.primary { color: #161b22; background: linear-gradient(135deg, #ead8a5, #c6a967); border-color: transparent; font-weight: 700; }
+    .page-readout { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .page-input {
+      width: 48px; height: 36px; text-align: center; color: var(--text);
+      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 8px;
+      font: inherit; font-size: 12px;
+    }
+    .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 14px auto 0; overflow: hidden; }
+    #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
+    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 12px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
+    .bottomline span:last-child { text-align: right; }
+    .error { color: #f1b5a9 !important; line-height: 1.8; }
+    footer { text-align: center; color: #718092; font-size: 10px; letter-spacing: .12em; padding: 2px 15px 22px; position: relative; z-index: 1; }
+    @media (max-width: 640px) {
+      .topbar { width: calc(100% - 30px); padding-top: 17px; }
+      .top-note { display: none; }
+      .intro { padding-top: 15px; }
+      .intro p { font-size: 11px; }
+      main { padding: 8px 9px 14px; }
+      .reader-shell { border-radius: 16px; padding: 12px 10px 12px; }
+      .reader-topline { font-size: 10px; margin-bottom: 7px; }
+      .book-stage { padding-bottom: 10px; }
+      .controls { gap: 7px; padding-top: 11px; }
+      .control-btn { height: 38px; min-width: 38px; padding: 0 10px; border-radius: 9px; }
+      .control-btn .btn-text { display: none; }
+      .page-readout { gap: 5px; font-size: 11px; }
+      .page-input { width: 42px; height: 34px; }
+      .bottomline { font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
-
-  <!-- 1. 引入本機 PDF.js (傳統 JS) -->
-  <script src="./build/pdf.min.js"></script>
-  <!-- 2. 引入本機 Page Flip 翻頁套件 -->
-  <script src="./page-flip.browser.js"></script>
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">✦</div>
+      <div>
+        <div class="brand-title">GRADUATION ARCHIVE</div>
+        <div class="brand-subtitle">A BOOK OF OUR MEMORIES</div>
+      </div>
+    </div>
+    <div class="top-note">MEMORIES · FRIENDSHIP · THE FUTURE</div>
+  </header>
 
-  <div class="status-container">
-    <div id="loading-status">正在自動載入電子書 (index.pdf)...</div>
-  </div>
+  <section class="intro">
+    <div class="eyebrow">OUR CHAPTER · 2026</div>
+    <h1>畢業紀念冊</h1>
+    <p>把一起走過的日子，珍藏成永遠。</p>
+    <div class="ornament" aria-hidden="true"><span></span></div>
+  </section>
 
-  <div class="flipbook-wrapper">
-    <div id="flipbook"></div>
-  </div>
+  <main>
+    <section class="reader-shell" aria-label="電子紀念冊閱讀器">
+      <div class="reader-topline">
+        <div class="live-status"><span class="status-dot"></span><span id="reader-label">紀念冊閱讀模式</span></div>
+        <span id="total-label">準備載入中</span>
+      </div>
+      <div class="book-stage">
+        <div id="loading-status" role="status" aria-live="polite">
+          <div class="loader"></div>
+          正在準備我們的回憶……
+        </div>
+        <div id="flipbook" aria-label="可翻頁的 PDF 紀念冊"></div>
+      </div>
+      <div class="controls" aria-label="翻頁控制">
+        <button class="control-btn" id="first-btn" type="button" title="回到封面" aria-label="回到封面" disabled>⇤ <span class="btn-text">封面</span></button>
+        <button class="control-btn" id="prev-btn" type="button" title="上一頁" aria-label="上一頁" disabled>← <span class="btn-text">上一頁</span></button>
+        <div class="page-readout">
+          <input class="page-input" id="page-input" type="number" min="1" value="1" aria-label="跳至頁碼" disabled>
+          <span>/</span><span id="page-total">—</span>
+        </div>
+        <button class="control-btn primary" id="next-btn" type="button" title="下一頁" aria-label="下一頁" disabled><span class="btn-text">下一頁</span> →</button>
+        <button class="control-btn" id="last-btn" type="button" title="前往最後一頁" aria-label="前往最後一頁" disabled><span class="btn-text">末頁</span> ⇥</button>
+        <button class="control-btn" id="fullscreen-btn" type="button" title="全螢幕閱讀" aria-label="全螢幕閱讀">⛶ <span class="btn-text">全螢幕</span></button>
+      </div>
+      <div class="progress-wrap" aria-label="閱讀進度"><div id="progress"></div></div>
+      <div class="bottomline">
+        <span>慢慢翻閱，記住每一個瞬間。</span>
+        <span>建議使用全螢幕閱讀</span>
+      </div>
+    </section>
+  </main>
+  <footer>MADE OF MEMORIES · CLASS OF 2026</footer>
 
+  <script src="./build/pdf.min.js"></script>
+  <script src="./page-flip.browser.js"></script>
   <script>
-    // 指定 Worker 檔案路徑
-    pdfjsLib.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.js';
+    (() => {
+      const PDF_URL = './index.pdf';
+      const loadingStatus = document.getElementById('loading-status');
+      const flipbook = document.getElementById('flipbook');
+      const totalLabel = document.getElementById('total-label');
+      const pageTotal = document.getElementById('page-total');
+      const pageInput = document.getElementById('page-input');
+      const progress = document.getElementById('progress');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const firstBtn = document.getElementById('first-btn');
+      const lastBtn = document.getElementById('last-btn');
+      const fullscreenBtn = document.getElementById('fullscreen-btn');
+      let pageFlip = null;
+      let totalPages = 0;
+      let currentPage = 0;
 
-    const loadingStatus = document.getElementById('loading-status');
-    const flipbookContainer = document.getElementById('flipbook');
-    
-    // 設定預設要載入的 PDF 檔名
-    const DEFAULT_PDF_URL = './index.pdf';
-
-    let pageFlip = null;
-
-    // 網頁開啟後自動執行的函式
-    async function loadBook() {
-      try {
-        loadingStatus.innerText = '讀取 index.pdf 中...';
-
-        // 1. 自動從同目錄 fetch 讀取 index.pdf
-        const response = await fetch(DEFAULT_PDF_URL);
-        if (!response.ok) {
-          throw new Error(`無法讀取檔案，HTTP 狀態碼: ${response.status}`);
-        }
-        const arrayBuffer = await response.arrayBuffer();
-
-        // 2. 解析 PDF
-        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const totalPages = pdfDoc.numPages;
-
-        loadingStatus.innerText = `解析完成 (共 ${totalPages} 頁)，正在繪製頁面...`;
-
-        // 取得第一頁尺寸做為電子書基準比例
-        const firstPage = await pdfDoc.getPage(1);
-        const viewport = firstPage.getViewport({ scale: 1 });
-        const pageWidth = viewport.width;
-        const pageHeight = viewport.height;
-
-        // 3. 逐頁渲染成 Canvas DOM
-        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-          loadingStatus.innerText = `正在渲染第 ${pageNum} / ${totalPages} 頁...`;
-          
-          const page = await pdfDoc.getPage(pageNum);
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          
-          // scale: 1.5 可提升清晰度
-          const renderViewport = page.getViewport({ scale: 1.5 });
-          canvas.width = renderViewport.width;
-          canvas.height = renderViewport.height;
-
-          await page.render({
-            canvasContext: context,
-            viewport: renderViewport
-          }).promise;
-
-          const pageDiv = document.createElement('div');
-          pageDiv.className = 'page';
-          pageDiv.appendChild(canvas);
-          flipbookContainer.appendChild(pageDiv);
-        }
-
-        loadingStatus.innerText = '初始化翻頁效果中...';
-
-        // 4. 初始化 PageFlip 翻頁動畫
-        pageFlip = new St.PageFlip(flipbookContainer, {
-          width: pageWidth,
-          height: pageHeight,
-          size: 'fixed',
-          minWidth: 300,
-          maxWidth: 1000,
-          minHeight: 400,
-          maxHeight: 1400,
-          maxShadowOpacity: 0.5,
-          showCover: true, // 第一頁獨立為封面
-          mobileScrollSupport: false
-        });
-
-        const pages = flipbookContainer.querySelectorAll('.page');
-        pageFlip.loadFromHTML(pages);
-
-        // 渲染完成，顯示電子書並隱藏提示
-        flipbookContainer.style.display = 'block';
-        loadingStatus.innerText = '';
-
-      } catch (err) {
-        console.error(err);
-        loadingStatus.innerText = '載入失敗！請確認 index.pdf 檔案是否存在於同目錄下。';
+      if (!window.pdfjsLib || !window.St || !window.St.PageFlip) {
+        showError('找不到翻頁程式。請確認 build 資料夾、pdf.min.js 與 page-flip.browser.js 都放在正確位置。');
+        return;
       }
-    }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.js';
 
-    // 頁面載入完成後自動執行
-    window.addEventListener('DOMContentLoaded', loadBook);
+      function showError(message) {
+        loadingStatus.innerHTML = '';
+        loadingStatus.classList.add('error');
+        loadingStatus.textContent = message;
+        totalLabel.textContent = '載入失敗';
+      }
+      function updateControls(index) {
+        currentPage = Math.max(0, Math.min(index, totalPages - 1));
+        pageInput.value = String(currentPage + 1);
+        pageInput.max = String(totalPages);
+        pageTotal.textContent = String(totalPages);
+        totalLabel.textContent = `共 ${totalPages} 頁`;
+        progress.style.width = `${totalPages > 1 ? (currentPage / (totalPages - 1)) * 100 : 100}%`;
+        firstBtn.disabled = prevBtn.disabled = currentPage <= 0;
+        nextBtn.disabled = lastBtn.disabled = currentPage >= totalPages - 1;
+      }
+      function goToPage(value) {
+        if (!pageFlip || !totalPages) return;
+        const n = Number(value);
+        if (!Number.isFinite(n)) { pageInput.value = String(currentPage + 1); return; }
+        const target = Math.max(1, Math.min(totalPages, Math.round(n))) - 1;
+        pageFlip.turnToPage(target);
+        updateControls(target);
+      }
+
+      prevBtn.addEventListener('click', () => pageFlip && pageFlip.flipPrev());
+      nextBtn.addEventListener('click', () => pageFlip && pageFlip.flipNext());
+      firstBtn.addEventListener('click', () => goToPage(1));
+      lastBtn.addEventListener('click', () => goToPage(totalPages));
+      pageInput.addEventListener('change', () => goToPage(pageInput.value));
+      pageInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { goToPage(pageInput.value); pageInput.blur(); }
+      });
+      fullscreenBtn.addEventListener('click', async () => {
+        try {
+          if (!document.fullscreenElement) await document.querySelector('.reader-shell').requestFullscreen();
+          else await document.exitFullscreen();
+        } catch (error) {
+          fullscreenBtn.title = '此瀏覽器不允許全螢幕模式';
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        const active = Boolean(document.fullscreenElement);
+        fullscreenBtn.innerHTML = active ? '⛶ <span class="btn-text">退出全螢幕</span>' : '⛶ <span class="btn-text">全螢幕</span>';
+      });
+      document.addEventListener('keydown', event => {
+        if (event.target === pageInput) return;
+        if (event.key === 'ArrowLeft' && pageFlip) pageFlip.flipPrev();
+        if (event.key === 'ArrowRight' && pageFlip) pageFlip.flipNext();
+      });
+
+      async function loadBook() {
+        try {
+          loadingStatus.innerHTML = '<div class="loader"></div>正在讀取紀念冊 PDF……';
+          const response = await fetch(PDF_URL);
+          if (!response.ok) throw new Error(`PDF 讀取失敗（HTTP ${response.status}）`);
+          const buffer = await response.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+          totalPages = pdf.numPages;
+          totalLabel.textContent = `共 ${totalPages} 頁`;
+          pageTotal.textContent = String(totalPages);
+
+          const firstPage = await pdf.getPage(1);
+          const baseViewport = firstPage.getViewport({ scale: 1 });
+          const renderScale = Math.min(2, Math.max(1.35, window.devicePixelRatio || 1.5));
+
+          for (let n = 1; n <= totalPages; n++) {
+            loadingStatus.innerHTML = `<div class="loader"></div>正在整理回憶…… ${n} / ${totalPages}`;
+            const pdfPage = await pdf.getPage(n);
+            const viewport = pdfPage.getViewport({ scale: renderScale });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d', { alpha: false });
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            await pdfPage.render({ canvasContext: context, viewport }).promise;
+            const pageElement = document.createElement('div');
+            pageElement.className = 'page';
+            pageElement.appendChild(canvas);
+            flipbook.appendChild(pageElement);
+          }
+
+          loadingStatus.style.display = 'none';
+          flipbook.style.display = 'block';
+          pageFlip = new St.PageFlip(flipbook, {
+            width: baseViewport.width,
+            height: baseViewport.height,
+            size: 'stretch',
+            minWidth: 260,
+            maxWidth: 900,
+            minHeight: 340,
+            maxHeight: 1200,
+            maxShadowOpacity: 0.28,
+            showCover: true,
+            mobileScrollSupport: true,
+            usePortrait: true,
+            drawShadow: true,
+            flippingTime: 800,
+            autoSize: true,
+            startPage: 0
+          });
+          pageFlip.loadFromHTML(flipbook.querySelectorAll('.page'));
+          pageFlip.on('flip', event => updateControls(Number(event.data) || 0));
+          pageInput.disabled = false;
+          updateControls(0);
+          document.getElementById('reader-label').textContent = '已準備好，開始閱讀';
+        } catch (error) {
+          console.error(error);
+          showError('載入失敗。請確認 index.pdf 與 index.html 位於同一資料夾，並透過本機網站伺服器開啟，而不是直接雙擊 HTML 檔案。');
+        }
+      }
+      window.addEventListener('DOMContentLoaded', loadBook, { once: true });
+    })();
   </script>
 </body>
 </html>
