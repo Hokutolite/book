@@ -21,6 +21,7 @@
     body {
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh;
       color: var(--text);
       font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
       background:
@@ -45,7 +46,7 @@
     .topbar {
       width: min(1180px, calc(100% - 44px));
       margin: 0 auto;
-      padding: 25px 0 14px;
+      padding: 12px 0 6px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -67,7 +68,7 @@
     .brand-title { font-size: 14px; letter-spacing: .16em; font-weight: 650; }
     .brand-subtitle { margin-top: 4px; font-size: 10px; color: var(--muted); letter-spacing: .22em; }
     .top-note { font-size: 11px; color: var(--muted); letter-spacing: .12em; }
-    .intro { text-align: center; padding: 16px 18px 4px; position: relative; z-index: 1; }
+    .intro { text-align: center; padding: 5px 18px 0; position: relative; z-index: 1; }
     .eyebrow {
       color: var(--gold); font-size: 10px; letter-spacing: .38em;
       text-transform: uppercase; margin-bottom: 11px;
@@ -89,13 +90,15 @@
       border-radius: 22px;
       background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
       box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
-      padding: 20px 22px 16px;
-      min-height: 240px;
+      padding: 12px 16px 10px;
+      min-height: 0;
+      min-width: 0;
+      height: calc(100dvh - 205px);
     }
     .reader-topline {
       width: 100%; display: flex; align-items: center; justify-content: space-between;
       gap: 12px; color: var(--muted); font-size: 11px; letter-spacing: .08em;
-      margin-bottom: 13px;
+      margin-bottom: 6px;
     }
     .live-status { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(217,193,138,.5); }
@@ -107,19 +110,19 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .book-stage {
-      width: 100%; min-height: 250px; display: flex; align-items: center; justify-content: center;
-      position: relative; padding: 2px 0 14px;
+      width: 100%; min-height: 0; flex: 1; display: flex; align-items: center; justify-content: center;
+      position: relative; padding: 2px 0 8px; overflow: hidden;
     }
     .book-stage::before {
       content: ""; position: absolute; width: 65%; height: 35px; bottom: 0;
       background: rgba(0,0,0,.42); filter: blur(28px); border-radius: 50%;
     }
-    #flipbook { display: none; position: relative; z-index: 1; }
+    #flipbook { display: none; position: relative; z-index: 1; max-width: 100%; max-height: 100%; }
     .page { background: #fff; overflow: hidden; }
     .page canvas { display: block; width: 100%; height: 100%; }
     .controls {
       width: 100%; display: flex; align-items: center; justify-content: center;
-      gap: 12px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07);
+      gap: 8px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,.07);
       flex-wrap: wrap;
     }
     .control-btn {
@@ -140,27 +143,44 @@
       background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 8px;
       font: inherit; font-size: 12px;
     }
-    .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 14px auto 0; overflow: hidden; }
+    .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 8px auto 0; overflow: hidden; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
-    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 12px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
+    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 7px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
+    footer { text-align: center; color: #718092; font-size: 10px; letter-spacing: .12em; padding: 0 15px 8px; position: relative; z-index: 1; }
+    body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none; }
+    body.reading-mode main { padding: 8px; }
+    body.reading-mode .reader-shell { width: 100%; height: calc(100dvh - 16px); }
+    body.reading-mode .book-stage { min-height: 0; }
+    body.reading-mode .reader-topline { margin-bottom: 4px; }
+    body.reading-mode .bottomline { display: none; }
     .bottomline span:last-child { text-align: right; }
     .error { color: #f1b5a9 !important; line-height: 1.8; }
     footer { text-align: center; color: #718092; font-size: 10px; letter-spacing: .12em; padding: 2px 15px 22px; position: relative; z-index: 1; }
     @media (max-width: 640px) {
-      .topbar { width: calc(100% - 30px); padding-top: 17px; }
+      .topbar { width: calc(100% - 30px); padding-top: 10px; }
       .top-note { display: none; }
-      .intro { padding-top: 15px; }
+      .intro { padding-top: 5px; }
+      .eyebrow { margin-bottom: 6px; letter-spacing: .25em; }
+      h1 { font-size: 23px; }
+      .ornament { margin-top: 8px; }
+      .brand-mark { width: 32px; height: 32px; flex-basis: 32px; }
+      .brand-title { font-size: 12px; }
+      .brand-subtitle { font-size: 9px; }
       .intro p { font-size: 11px; }
-      main { padding: 8px 9px 14px; }
-      .reader-shell { border-radius: 16px; padding: 12px 10px 12px; }
+      main { padding: 5px 7px 8px; }
+      .reader-shell { border-radius: 14px; padding: 8px 7px 8px; flex: 1; width: 100%; height: calc(100dvh - 165px); }
       .reader-topline { font-size: 10px; margin-bottom: 7px; }
-      .book-stage { padding-bottom: 10px; }
+      .book-stage { padding-bottom: 5px; min-height: 0; }
       .controls { gap: 7px; padding-top: 11px; }
       .control-btn { height: 38px; min-width: 38px; padding: 0 10px; border-radius: 9px; }
       .control-btn .btn-text { display: none; }
       .page-readout { gap: 5px; font-size: 11px; }
       .page-input { width: 42px; height: 34px; }
       .bottomline { font-size: 9px; }
+      footer { padding-bottom: 5px; }
+      body { overflow: hidden; }
+      body.reading-mode main { padding: 4px; }
+      body.reading-mode .reader-shell { height: calc(100dvh - 8px); padding: 6px 4px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -280,14 +300,17 @@
       });
       fullscreenBtn.addEventListener('click', async () => {
         try {
-          if (!document.fullscreenElement) await document.querySelector('.reader-shell').requestFullscreen();
-          else await document.exitFullscreen();
+          if (!document.fullscreenElement) {
+            await document.querySelector('.reader-shell').requestFullscreen();
+            document.body.classList.add('reading-mode');
+          } else await document.exitFullscreen();
         } catch (error) {
           fullscreenBtn.title = '此瀏覽器不允許全螢幕模式';
         }
       });
       document.addEventListener('fullscreenchange', () => {
         const active = Boolean(document.fullscreenElement);
+        document.body.classList.toggle('reading-mode', active);
         fullscreenBtn.innerHTML = active ? '⛶ <span class="btn-text">退出全螢幕</span>' : '⛶ <span class="btn-text">全螢幕</span>';
       });
       document.addEventListener('keydown', event => {
@@ -295,6 +318,21 @@
         if (event.key === 'ArrowLeft' && pageFlip) pageFlip.flipPrev();
         if (event.key === 'ArrowRight' && pageFlip) pageFlip.flipNext();
       });
+
+      function fitBookToScreen(baseWidth, baseHeight) {
+        const stage = document.querySelector('.book-stage');
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const availableWidth = Math.max(180, stage.clientWidth - 12);
+        const availableHeight = Math.max(180, stage.clientHeight - 12);
+        // 桌面盡量顯示左右兩頁；手機改為單頁，避免整本超出螢幕。
+        const spreadWidth = isMobile ? baseWidth : baseWidth * 2;
+        const scale = Math.min(availableWidth / spreadWidth, availableHeight / baseHeight, 1);
+        const pageWidth = Math.max(120, Math.floor(baseWidth * scale));
+        const pageHeight = Math.max(160, Math.floor(baseHeight * scale));
+        flipbook.style.width = `${isMobile ? pageWidth : pageWidth * 2}px`;
+        flipbook.style.height = `${pageHeight}px`;
+        return { pageWidth, pageHeight, isMobile };
+      }
 
       async function loadBook() {
         try {
@@ -309,7 +347,7 @@
 
           const firstPage = await pdf.getPage(1);
           const baseViewport = firstPage.getViewport({ scale: 1 });
-          const renderScale = Math.min(2, Math.max(1.35, window.devicePixelRatio || 1.5));
+          const renderScale = Math.min(1.5, Math.max(1.1, (window.devicePixelRatio || 1.25) * 0.9));
 
           for (let n = 1; n <= totalPages; n++) {
             loadingStatus.innerHTML = `<div class="loader"></div>正在整理回憶…… ${n} / ${totalPages}`;
@@ -328,25 +366,27 @@
 
           loadingStatus.style.display = 'none';
           flipbook.style.display = 'block';
+          const fit = fitBookToScreen(baseViewport.width, baseViewport.height);
           pageFlip = new St.PageFlip(flipbook, {
-            width: baseViewport.width,
-            height: baseViewport.height,
-            size: 'stretch',
-            minWidth: 260,
-            maxWidth: 900,
-            minHeight: 340,
-            maxHeight: 1200,
-            maxShadowOpacity: 0.28,
+            width: fit.pageWidth,
+            height: fit.pageHeight,
+            size: 'fixed',
+            minWidth: fit.pageWidth,
+            maxWidth: fit.pageWidth,
+            minHeight: fit.pageHeight,
+            maxHeight: fit.pageHeight,
+            maxShadowOpacity: 0.22,
             showCover: true,
             mobileScrollSupport: true,
-            usePortrait: true,
+            usePortrait: fit.isMobile,
             drawShadow: true,
-            flippingTime: 800,
-            autoSize: true,
+            flippingTime: 500,
+            autoSize: false,
             startPage: 0
           });
           pageFlip.loadFromHTML(flipbook.querySelectorAll('.page'));
           pageFlip.on('flip', event => updateControls(Number(event.data) || 0));
+
           pageInput.disabled = false;
           updateControls(0);
           document.getElementById('reader-label').textContent = '已準備好，開始閱讀';
