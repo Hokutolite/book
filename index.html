@@ -143,6 +143,12 @@
       background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 8px;
       font: inherit; font-size: 12px;
     }
+    .zoom-controls {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding-top: 7px; color: var(--muted); font-size: 11px;
+    }
+    .zoom-controls input { width: min(220px, 38vw); accent-color: var(--gold); cursor: pointer; }
+    #zoom-value { min-width: 36px; color: var(--gold-bright); text-align: right; font-variant-numeric: tabular-nums; }
     .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 8px auto 0; overflow: hidden; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
     .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 7px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
@@ -171,8 +177,10 @@
       .reader-shell { border-radius: 14px; padding: 8px 7px 8px; flex: 1; width: 100%; height: calc(100dvh - 165px); }
       .reader-topline { font-size: 10px; margin-bottom: 7px; }
       .book-stage { padding-bottom: 5px; min-height: 0; }
-      .controls { gap: 7px; padding-top: 11px; }
-      .control-btn { height: 38px; min-width: 38px; padding: 0 10px; border-radius: 9px; }
+      .controls { gap: 5px; padding-top: 8px; }
+      .control-btn { height: 35px; min-width: 34px; padding: 0 8px; border-radius: 9px; font-size: 11px; }
+      .zoom-controls { padding-top: 5px; gap: 7px; }
+      .zoom-controls input { width: min(170px, 42vw); }
       .control-btn .btn-text { display: none; }
       .page-readout { gap: 5px; font-size: 11px; }
       .page-input { width: 42px; height: 34px; }
@@ -181,6 +189,26 @@
       body { overflow: hidden; }
       body.reading-mode main { padding: 4px; }
       body.reading-mode .reader-shell { height: calc(100dvh - 8px); padding: 6px 4px; }
+    }
+    @media (max-width: 760px) and (orientation: landscape) {
+      .topbar { padding-top: 5px; padding-bottom: 2px; }
+      .brand-mark { width: 27px; height: 27px; flex-basis: 27px; font-size: 15px; }
+      .brand-title { font-size: 10px; }
+      .brand-subtitle, .top-note, .intro p, .ornament, footer { display: none; }
+      .intro { padding: 1px 10px 3px; }
+      .eyebrow { font-size: 8px; margin-bottom: 2px; }
+      h1 { font-size: 16px; letter-spacing: .12em; }
+      main { padding: 3px 6px 5px; }
+      .reader-shell { height: calc(100dvh - 53px); padding: 5px 7px; border-radius: 10px; }
+      .reader-topline { margin-bottom: 2px; font-size: 9px; }
+      .book-stage { padding: 0; }
+      .controls { gap: 4px; padding-top: 5px; }
+      .control-btn { height: 30px; min-width: 30px; padding: 0 6px; font-size: 10px; }
+      .zoom-controls { padding-top: 3px; font-size: 9px; }
+      .zoom-controls input { width: min(150px, 30vw); }
+      .progress-wrap { margin-top: 4px; }
+      .bottomline { display: none; }
+      body.reading-mode .reader-shell { height: calc(100dvh - 8px); }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -229,6 +257,12 @@
         <button class="control-btn primary" id="next-btn" type="button" title="下一頁" aria-label="下一頁" disabled><span class="btn-text">下一頁</span> →</button>
         <button class="control-btn" id="last-btn" type="button" title="前往最後一頁" aria-label="前往最後一頁" disabled><span class="btn-text">末頁</span> ⇥</button>
         <button class="control-btn" id="fullscreen-btn" type="button" title="全螢幕閱讀" aria-label="全螢幕閱讀">⛶ <span class="btn-text">全螢幕</span></button>
+      </div>
+      <div class="zoom-controls" aria-label="調整書本大小">
+        <span>縮小</span>
+        <input id="zoom-slider" type="range" min="60" max="110" value="100" step="5" aria-label="書本縮放大小">
+        <span>放大</span>
+        <span id="zoom-value">100%</span>
       </div>
       <div class="progress-wrap" aria-label="閱讀進度"><div id="progress"></div></div>
       <div class="bottomline">
@@ -319,20 +353,107 @@
         if (event.key === 'ArrowRight' && pageFlip) pageFlip.flipNext();
       });
 
-      function fitBookToScreen(baseWidth, baseHeight) {
-        const stage = document.querySelector('.book-stage');
-        const isMobile = window.matchMedia('(max-width: 640px)').matches;
-        const availableWidth = Math.max(180, stage.clientWidth - 12);
-        const availableHeight = Math.max(180, stage.clientHeight - 12);
-        // 桌面盡量顯示左右兩頁；手機改為單頁，避免整本超出螢幕。
-        const spreadWidth = isMobile ? baseWidth : baseWidth * 2;
-        const scale = Math.min(availableWidth / spreadWidth, availableHeight / baseHeight, 1);
-        const pageWidth = Math.max(120, Math.floor(baseWidth * scale));
-        const pageHeight = Math.max(160, Math.floor(baseHeight * scale));
-        flipbook.style.width = `${isMobile ? pageWidth : pageWidth * 2}px`;
-        flipbook.style.height = `${pageHeight}px`;
-        return { pageWidth, pageHeight, isMobile };
+      let basePageWidth = 0;
+      let basePageHeight = 0;
+      let zoomPercent = 100;
+      let resizeTimer = null;
+      let swipeStartX = null;
+      let swipeStartY = null;
+      const zoomSlider = document.getElementById('zoom-slider');
+      const zoomValue = document.getElementById('zoom-value');
+      const stage = document.querySelector('.book-stage');
+
+      function isCompactLayout() {
+        // Touch-first devices use single-page mode, including landscape phones.
+        return window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
       }
+
+      function fitBookToScreen() {
+        const compact = isCompactLayout();
+        const availableWidth = Math.max(160, stage.clientWidth - 18);
+        const availableHeight = Math.max(150, stage.clientHeight - 16);
+        const pagesAcross = compact ? 1 : 2;
+        const fitScale = Math.min(
+          availableWidth / (basePageWidth * pagesAcross),
+          availableHeight / basePageHeight
+        );
+        const scale = fitScale * (zoomPercent / 100);
+        return {
+          pageWidth: Math.max(100, Math.floor(basePageWidth * scale)),
+          pageHeight: Math.max(130, Math.floor(basePageHeight * scale)),
+          compact
+        };
+      }
+
+      function rebuildFlipbook() {
+        if (!basePageWidth || !basePageHeight || !flipbook.querySelector('.page')) return;
+        const savedPage = currentPage;
+        if (pageFlip) {
+          try { pageFlip.destroy(); } catch (_) {}
+          pageFlip = null;
+        }
+        const fit = fitBookToScreen();
+        flipbook.style.width = `${fit.pageWidth * (fit.compact ? 1 : 2)}px`;
+        flipbook.style.height = `${fit.pageHeight}px`;
+
+        pageFlip = new St.PageFlip(flipbook, {
+          width: fit.pageWidth,
+          height: fit.pageHeight,
+          size: 'fixed',
+          minWidth: fit.pageWidth,
+          maxWidth: fit.pageWidth,
+          minHeight: fit.pageHeight,
+          maxHeight: fit.pageHeight,
+          maxShadowOpacity: 0.22,
+          showCover: true,
+          mobileScrollSupport: false,
+          usePortrait: fit.compact,
+          drawShadow: true,
+          flippingTime: 420,
+          autoSize: false,
+          startPage: Math.min(savedPage, Math.max(0, totalPages - 1))
+        });
+        pageFlip.loadFromHTML(flipbook.querySelectorAll('.page'));
+        pageFlip.on('flip', event => updateControls(Number(event.data) || 0));
+        if (savedPage > 0) {
+          try { pageFlip.turnToPage(Math.min(savedPage, totalPages - 1)); } catch (_) {}
+        }
+        updateControls(Math.min(savedPage, totalPages - 1));
+      }
+
+      zoomSlider.addEventListener('input', () => {
+        zoomPercent = Number(zoomSlider.value);
+        zoomValue.textContent = `${zoomPercent}%`;
+        rebuildFlipbook();
+      });
+
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(rebuildFlipbook, 180);
+      });
+      document.addEventListener('fullscreenchange', () => {
+        setTimeout(rebuildFlipbook, 120);
+      });
+
+      // Touch swipe fallback: horizontal swipes navigate pages on phones/tablets.
+      stage.addEventListener('pointerdown', event => {
+        if (event.pointerType !== 'touch') return;
+        swipeStartX = event.clientX;
+        swipeStartY = event.clientY;
+      }, { passive: true });
+      stage.addEventListener('pointerup', event => {
+        if (event.pointerType !== 'touch' || swipeStartX === null || swipeStartY === null) return;
+        const dx = event.clientX - swipeStartX;
+        const dy = event.clientY - swipeStartY;
+        swipeStartX = swipeStartY = null;
+        if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+          if (dx < 0 && pageFlip) pageFlip.flipNext();
+          else if (dx > 0 && pageFlip) pageFlip.flipPrev();
+        }
+      }, { passive: true });
+      stage.addEventListener('pointercancel', () => {
+        swipeStartX = swipeStartY = null;
+      }, { passive: true });
 
       async function loadBook() {
         try {
@@ -347,7 +468,10 @@
 
           const firstPage = await pdf.getPage(1);
           const baseViewport = firstPage.getViewport({ scale: 1 });
-          const renderScale = Math.min(1.5, Math.max(1.1, (window.devicePixelRatio || 1.25) * 0.9));
+          basePageWidth = baseViewport.width;
+          basePageHeight = baseViewport.height;
+          // Moderate canvas resolution to reduce memory use and lag on phones.
+          const renderScale = Math.min(1.35, Math.max(1.0, (window.devicePixelRatio || 1.1) * 0.75));
 
           for (let n = 1; n <= totalPages; n++) {
             loadingStatus.innerHTML = `<div class="loader"></div>正在整理回憶…… ${n} / ${totalPages}`;
@@ -366,30 +490,12 @@
 
           loadingStatus.style.display = 'none';
           flipbook.style.display = 'block';
-          const fit = fitBookToScreen(baseViewport.width, baseViewport.height);
-          pageFlip = new St.PageFlip(flipbook, {
-            width: fit.pageWidth,
-            height: fit.pageHeight,
-            size: 'fixed',
-            minWidth: fit.pageWidth,
-            maxWidth: fit.pageWidth,
-            minHeight: fit.pageHeight,
-            maxHeight: fit.pageHeight,
-            maxShadowOpacity: 0.22,
-            showCover: true,
-            mobileScrollSupport: true,
-            usePortrait: fit.isMobile,
-            drawShadow: true,
-            flippingTime: 500,
-            autoSize: false,
-            startPage: 0
-          });
-          pageFlip.loadFromHTML(flipbook.querySelectorAll('.page'));
-          pageFlip.on('flip', event => updateControls(Number(event.data) || 0));
-
-          pageInput.disabled = false;
-          updateControls(0);
-          document.getElementById('reader-label').textContent = '已準備好，開始閱讀';
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            rebuildFlipbook();
+            pageInput.disabled = false;
+            updateControls(0);
+            document.getElementById('reader-label').textContent = '已準備好，開始閱讀';
+          }));
         } catch (error) {
           console.error(error);
           showError('載入失敗。請確認 index.pdf 與 index.html 位於同一資料夾，並透過本機網站伺服器開啟，而不是直接雙擊 HTML 檔案。');
