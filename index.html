@@ -111,13 +111,21 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .book-stage {
       width: 100%; min-height: 0; flex: 1; display: flex; align-items: center; justify-content: center;
-      position: relative; padding: 2px 0 8px; overflow: hidden;
+      position: relative; padding: 8px; overflow: auto;
+      overscroll-behavior: contain; scrollbar-width: thin;
+      scrollbar-color: rgba(217,193,138,.55) rgba(255,255,255,.06);
+      touch-action: pan-x pan-y;
     }
     .book-stage::before {
       content: ""; position: absolute; width: 65%; height: 35px; bottom: 0;
-      background: rgba(0,0,0,.42); filter: blur(28px); border-radius: 50%;
+      background: rgba(0,0,0,.25); filter: blur(28px); border-radius: 50%;
+      pointer-events: none;
     }
-    #flipbook { display: none; position: relative; z-index: 1; max-width: 100%; max-height: 100%; }
+    #flipbook {
+      display: none; position: relative; z-index: 1;
+      flex: 0 0 auto; max-width: none; max-height: none;
+      margin: auto;
+    }
     .page { background: #fff; overflow: hidden; }
     .page canvas { display: block; width: 100%; height: 100%; }
     .controls {
@@ -260,11 +268,12 @@
       </div>
       <div class="zoom-controls" aria-label="調整書本大小">
         <span>縮小</span>
-        <input id="zoom-slider" type="range" min="60" max="110" value="100" step="5" aria-label="書本縮放大小">
+        <input id="zoom-slider" type="range" min="60" max="150" value="100" step="5" aria-label="書本縮放大小">
         <span>放大</span>
         <span id="zoom-value">100%</span>
       </div>
       <div class="progress-wrap" aria-label="閱讀進度"><div id="progress"></div></div>
+      <div class="bottomline"><span>放大後可在書本區域上下／左右捲動</span><span>建議使用全螢幕閱讀</span></div>
       <div class="bottomline">
         <span>慢慢翻閱，記住每一個瞬間。</span>
         <span>建議使用全螢幕閱讀</span>
@@ -377,6 +386,8 @@
           availableWidth / (basePageWidth * pagesAcross),
           availableHeight / basePageHeight
         );
+        // 100% means fit-to-screen. Above 100%, allow the stage to scroll
+        // instead of clipping the enlarged book out of view.
         const scale = fitScale * (zoomPercent / 100);
         return {
           pageWidth: Math.max(100, Math.floor(basePageWidth * scale)),
@@ -395,6 +406,10 @@
         const fit = fitBookToScreen();
         flipbook.style.width = `${fit.pageWidth * (fit.compact ? 1 : 2)}px`;
         flipbook.style.height = `${fit.pageHeight}px`;
+        // Reset scroll to the book's beginning after resizing so it never
+        // appears to vanish because the enlarged canvas is outside the viewport.
+        stage.scrollLeft = 0;
+        stage.scrollTop = 0;
 
         pageFlip = new St.PageFlip(flipbook, {
           width: fit.pageWidth,
