@@ -111,19 +111,17 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .book-stage {
       width: 100%; min-height: 0; flex: 1; display: flex; align-items: center; justify-content: center;
-      position: relative; padding: 8px; overflow: auto;
-      overscroll-behavior: contain; scrollbar-width: thin;
-      scrollbar-color: rgba(217,193,138,.55) rgba(255,255,255,.06);
-      touch-action: pan-x pan-y;
+      position: relative; padding: 0; overflow: hidden;
+      touch-action: pan-y;
     }
     .book-stage::before {
-      content: ""; position: absolute; width: 65%; height: 35px; bottom: 0;
-      background: rgba(0,0,0,.25); filter: blur(28px); border-radius: 50%;
+      content: ""; position: absolute; width: 65%; height: 20px; bottom: 0;
+      background: rgba(0,0,0,.2); filter: blur(20px); border-radius: 50%;
       pointer-events: none;
     }
     #flipbook {
       display: none; position: relative; z-index: 1;
-      flex: 0 0 auto; max-width: none; max-height: none;
+      flex: 0 0 auto; max-width: 100%; max-height: 100%;
       margin: auto;
     }
     .page { background: #fff; overflow: hidden; }
@@ -151,12 +149,6 @@
       background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 8px;
       font: inherit; font-size: 12px;
     }
-    .zoom-controls {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding-top: 7px; color: var(--muted); font-size: 11px;
-    }
-    .zoom-controls input { width: min(220px, 38vw); accent-color: var(--gold); cursor: pointer; }
-    #zoom-value { min-width: 36px; color: var(--gold-bright); text-align: right; font-variant-numeric: tabular-nums; }
     .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 8px auto 0; overflow: hidden; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
     .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 7px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
@@ -187,8 +179,6 @@
       .book-stage { padding-bottom: 5px; min-height: 0; }
       .controls { gap: 5px; padding-top: 8px; }
       .control-btn { height: 35px; min-width: 34px; padding: 0 8px; border-radius: 9px; font-size: 11px; }
-      .zoom-controls { padding-top: 5px; gap: 7px; }
-      .zoom-controls input { width: min(170px, 42vw); }
       .control-btn .btn-text { display: none; }
       .page-readout { gap: 5px; font-size: 11px; }
       .page-input { width: 42px; height: 34px; }
@@ -206,14 +196,12 @@
       .intro { padding: 1px 10px 3px; }
       .eyebrow { font-size: 8px; margin-bottom: 2px; }
       h1 { font-size: 16px; letter-spacing: .12em; }
-      main { padding: 3px 6px 5px; }
-      .reader-shell { height: calc(100dvh - 53px); padding: 5px 7px; border-radius: 10px; }
+      main { padding: 2px 0 0; }
+      .reader-shell { height: calc(100dvh - 53px); padding: 4px 0 4px; border-radius: 0; border-left: 0; border-right: 0; }
       .reader-topline { margin-bottom: 2px; font-size: 9px; }
       .book-stage { padding: 0; }
       .controls { gap: 4px; padding-top: 5px; }
       .control-btn { height: 30px; min-width: 30px; padding: 0 6px; font-size: 10px; }
-      .zoom-controls { padding-top: 3px; font-size: 9px; }
-      .zoom-controls input { width: min(150px, 30vw); }
       .progress-wrap { margin-top: 4px; }
       .bottomline { display: none; }
       body.reading-mode .reader-shell { height: calc(100dvh - 8px); }
@@ -266,14 +254,8 @@
         <button class="control-btn" id="last-btn" type="button" title="前往最後一頁" aria-label="前往最後一頁" disabled><span class="btn-text">末頁</span> ⇥</button>
         <button class="control-btn" id="fullscreen-btn" type="button" title="全螢幕閱讀" aria-label="全螢幕閱讀">⛶ <span class="btn-text">全螢幕</span></button>
       </div>
-      <div class="zoom-controls" aria-label="調整書本大小">
-        <span>縮小</span>
-        <input id="zoom-slider" type="range" min="60" max="150" value="100" step="5" aria-label="書本縮放大小">
-        <span>放大</span>
-        <span id="zoom-value">100%</span>
-      </div>
       <div class="progress-wrap" aria-label="閱讀進度"><div id="progress"></div></div>
-      <div class="bottomline"><span>放大後可在書本區域上下／左右捲動</span><span>建議使用全螢幕閱讀</span></div>
+      <div class="bottomline"><span>可使用按鈕或觸控滑動翻頁</span><span>建議使用全螢幕閱讀</span></div>
       <div class="bottomline">
         <span>慢慢翻閱，記住每一個瞬間。</span>
         <span>建議使用全螢幕閱讀</span>
@@ -364,12 +346,9 @@
 
       let basePageWidth = 0;
       let basePageHeight = 0;
-      let zoomPercent = 100;
       let resizeTimer = null;
       let swipeStartX = null;
       let swipeStartY = null;
-      const zoomSlider = document.getElementById('zoom-slider');
-      const zoomValue = document.getElementById('zoom-value');
       const stage = document.querySelector('.book-stage');
 
       function isCompactLayout() {
@@ -386,9 +365,8 @@
           availableWidth / (basePageWidth * pagesAcross),
           availableHeight / basePageHeight
         );
-        // 100% means fit-to-screen. Above 100%, allow the stage to scroll
-        // instead of clipping the enlarged book out of view.
-        const scale = fitScale * (zoomPercent / 100);
+        // Always fit the complete page/book to the available screen space.
+        const scale = fitScale;
         return {
           pageWidth: Math.max(100, Math.floor(basePageWidth * scale)),
           pageHeight: Math.max(130, Math.floor(basePageHeight * scale)),
@@ -406,10 +384,6 @@
         const fit = fitBookToScreen();
         flipbook.style.width = `${fit.pageWidth * (fit.compact ? 1 : 2)}px`;
         flipbook.style.height = `${fit.pageHeight}px`;
-        // Reset scroll to the book's beginning after resizing so it never
-        // appears to vanish because the enlarged canvas is outside the viewport.
-        stage.scrollLeft = 0;
-        stage.scrollTop = 0;
 
         pageFlip = new St.PageFlip(flipbook, {
           width: fit.pageWidth,
@@ -435,12 +409,6 @@
         }
         updateControls(Math.min(savedPage, totalPages - 1));
       }
-
-      zoomSlider.addEventListener('input', () => {
-        zoomPercent = Number(zoomSlider.value);
-        zoomValue.textContent = `${zoomPercent}%`;
-        rebuildFlipbook();
-      });
 
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
