@@ -154,8 +154,11 @@
     .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 7px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
     footer { text-align: center; color: #718092; font-size: 10px; letter-spacing: .12em; padding: 0 15px 8px; position: relative; z-index: 1; }
     body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none; }
-    body.reading-mode main { padding: 8px; }
-    body.reading-mode .reader-shell { width: 100%; height: calc(100dvh - 16px); }
+    body.reading-mode main { padding: 0; min-height: 0; }
+    body.reading-mode .reader-shell {
+      width: 100%; height: 100dvh; min-height: 0;
+      border-radius: 0; border: 0; padding: 6px 8px;
+    }
     body.reading-mode .book-stage { min-height: 0; }
     body.reading-mode .reader-topline { margin-bottom: 4px; }
     body.reading-mode .bottomline { display: none; }
@@ -185,8 +188,25 @@
       .bottomline { font-size: 9px; }
       footer { padding-bottom: 5px; }
       body { overflow: hidden; }
-      body.reading-mode main { padding: 4px; }
-      body.reading-mode .reader-shell { height: calc(100dvh - 8px); padding: 6px 4px; }
+      body.reading-mode main { padding: 0; }
+      body.reading-mode .reader-shell { height: 100dvh; padding: 5px 2px; }
+    }
+    @media (max-height: 600px) and (orientation: landscape) {
+      .topbar { display: none; }
+      .intro { padding: 3px 10px 4px; }
+      .eyebrow { font-size: 8px; margin-bottom: 2px; }
+      h1 { font-size: 17px; letter-spacing: .12em; }
+      .intro p, .ornament { display: none; }
+      main { padding: 0; }
+      .reader-shell { height: calc(100dvh - 48px); padding: 4px 0; border-radius: 0; border-left: 0; border-right: 0; }
+      .reader-topline { margin-bottom: 2px; font-size: 9px; }
+      .book-stage { padding: 0; }
+      .controls { gap: 4px; padding-top: 4px; }
+      .control-btn { height: 29px; min-width: 29px; padding: 0 6px; font-size: 10px; }
+      .progress-wrap { margin-top: 3px; }
+      .bottomline, footer { display: none; }
+      body.reading-mode main { padding: 0; }
+      body.reading-mode .reader-shell { height: 100dvh; padding: 4px 0; }
     }
     @media (max-width: 760px) and (orientation: landscape) {
       .topbar { padding-top: 5px; padding-bottom: 2px; }
@@ -204,7 +224,7 @@
       .control-btn { height: 30px; min-width: 30px; padding: 0 6px; font-size: 10px; }
       .progress-wrap { margin-top: 4px; }
       .bottomline { display: none; }
-      body.reading-mode .reader-shell { height: calc(100dvh - 8px); }
+      body.reading-mode .reader-shell { height: 100dvh; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -283,6 +303,7 @@
       let pageFlip = null;
       let totalPages = 0;
       let currentPage = 0;
+      const pageTemplates = [];
 
       if (!window.pdfjsLib || !window.St || !window.St.PageFlip) {
         showError('找不到翻頁程式。請確認 build 資料夾、pdf.min.js 與 page-flip.browser.js 都放在正確位置。');
@@ -333,11 +354,6 @@
           fullscreenBtn.title = '此瀏覽器不允許全螢幕模式';
         }
       });
-      document.addEventListener('fullscreenchange', () => {
-        const active = Boolean(document.fullscreenElement);
-        document.body.classList.toggle('reading-mode', active);
-        fullscreenBtn.innerHTML = active ? '⛶ <span class="btn-text">退出全螢幕</span>' : '⛶ <span class="btn-text">全螢幕</span>';
-      });
       document.addEventListener('keydown', event => {
         if (event.target === pageInput) return;
         if (event.key === 'ArrowLeft' && pageFlip) pageFlip.flipPrev();
@@ -375,11 +391,17 @@
       }
 
       function rebuildFlipbook() {
-        if (!basePageWidth || !basePageHeight || !flipbook.querySelector('.page')) return;
+        if (!basePageWidth || !basePageHeight || pageTemplates.length === 0) return;
         const savedPage = currentPage;
         if (pageFlip) {
           try { pageFlip.destroy(); } catch (_) {}
           pageFlip = null;
+        }
+        // PageFlip mutates the page DOM. Recreate it from untouched templates
+        // so resizing/fullscreen never leaves an empty or black book.
+        flipbook.innerHTML = '';
+        for (const template of pageTemplates) {
+          flipbook.appendChild(template.cloneNode(true));
         }
         const fit = fitBookToScreen();
         flipbook.style.width = `${fit.pageWidth * (fit.compact ? 1 : 2)}px`;
@@ -415,7 +437,10 @@
         resizeTimer = setTimeout(rebuildFlipbook, 180);
       });
       document.addEventListener('fullscreenchange', () => {
-        setTimeout(rebuildFlipbook, 120);
+        const active = Boolean(document.fullscreenElement);
+        document.body.classList.toggle('reading-mode', active);
+        fullscreenBtn.innerHTML = active ? '⛶ <span class="btn-text">退出全螢幕</span>' : '⛶ <span class="btn-text">全螢幕</span>';
+        requestAnimationFrame(() => requestAnimationFrame(rebuildFlipbook));
       });
 
       // Touch swipe fallback: horizontal swipes navigate pages on phones/tablets.
@@ -468,6 +493,7 @@
             const pageElement = document.createElement('div');
             pageElement.className = 'page';
             pageElement.appendChild(canvas);
+            pageTemplates.push(pageElement.cloneNode(true));
             flipbook.appendChild(pageElement);
           }
 
