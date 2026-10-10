@@ -304,7 +304,16 @@
         nextBtn.disabled = lastBtn.disabled = currentPage >= totalPages - 1;
       }
 
-    // 恢復原本的尺寸計算方式，確保比例正確不飛掉
+      // 修正：使用 turnToPage 配合正確的 0-based 索引跳轉
+      function goToPage(value) {
+        if (!pageFlip || !totalPages) return;
+        const n = Number(value);
+        if (!Number.isFinite(n)) { pageInput.value = String(currentPage + 1); return; }
+        const target = Math.max(1, Math.min(totalPages, Math.round(n))) - 1;
+        pageFlip.turnToPage(target);
+        updateControls(target);
+      }
+
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
         const isMobile = window.innerWidth < 768 || window.matchMedia('(orientation: portrait)').matches;
@@ -337,8 +346,11 @@
 
       prevBtn.addEventListener('click', () => pageFlip && pageFlip.flipPrev());
       nextBtn.addEventListener('click', () => pageFlip && pageFlip.flipNext());
+      
+      // 修正：首頁直接跳至 1（索引 0），末頁直接跳至總頁數（索引 totalPages - 1）
       firstBtn.addEventListener('click', () => goToPage(1));
       lastBtn.addEventListener('click', () => goToPage(totalPages));
+      
       pageInput.addEventListener('change', () => goToPage(pageInput.value));
       pageInput.addEventListener('keydown', event => {
         if (event.key === 'Enter') { goToPage(pageInput.value); pageInput.blur(); }
@@ -432,7 +444,6 @@
           flipbook.style.width = `${dims.spreadWidth}px`;
           flipbook.style.height = `${dims.spreadHeight}px`;
 
-          // 恢復原本不會飛的參數：size 設為 'stretch'，並移除會限制死的 min/max
           pageFlip = new St.PageFlip(flipbook, {
             width: dims.pageWidth,
             height: dims.pageHeight,
@@ -448,6 +459,8 @@
           });
 
           pageFlip.loadFromHTML(flipbook.querySelectorAll('.page'));
+          
+          // 修正：監聽翻頁事件，確保當透過滑動或點擊翻頁時，輸入框與狀態能正確同步
           pageFlip.on('flip', event => updateControls(Number(event.data) || 0));
 
           pageInput.disabled = false;
