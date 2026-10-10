@@ -23,7 +23,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden !important;
-      position: fixed; /* 徹底鎖死頁面，防止手機或桌機產生任何上下滑動 */
+      position: fixed;
     }
     body {
       color: var(--text);
@@ -69,7 +69,6 @@
       font-size: 13px;
     }
     .brand-title { font-size: 11px; letter-spacing: .16em; font-weight: 650; }
-    .brand-subtitle { display: none; }
     .top-note { font-size: 8px; color: var(--muted); letter-spacing: .12em; }
     
     .intro { text-align: center; padding: 2px 10px; position: relative; z-index: 1; flex-shrink: 0; }
@@ -305,22 +304,13 @@
         nextBtn.disabled = lastBtn.disabled = currentPage >= totalPages - 1;
       }
 
-      function goToPage(value) {
-        if (!pageFlip || !totalPages) return;
-        const n = Number(value);
-        if (!Number.isFinite(n)) { pageInput.value = String(currentPage + 1); return; }
-        const target = Math.max(1, Math.min(totalPages, Math.round(n))) - 1;
-        pageFlip.turnToPage(target);
-        updateControls(target);
-      }
-
-      // 嚴格限制尺寸，確保手機單頁、桌機雙頁都能完美貼合容器且絕不超出
+    // 恢復原本的尺寸計算方式，確保比例正確不飛掉
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
         const isMobile = window.innerWidth < 768 || window.matchMedia('(orientation: portrait)').matches;
         
-        const availableWidth = Math.max(150, stage.clientWidth);
-        const availableHeight = Math.max(150, stage.clientHeight);
+        const availableWidth = Math.max(200, stage.clientWidth);
+        const availableHeight = Math.max(200, stage.clientHeight);
         
         const baseAspect = baseWidth / baseHeight;
         const spreadAspect = isMobile ? baseAspect : (baseAspect * 2);
@@ -399,10 +389,6 @@
         pageFlip.update({
           width: dims.pageWidth,
           height: dims.pageHeight,
-          minWidth: dims.pageWidth,
-          maxWidth: dims.pageWidth,
-          minHeight: dims.pageHeight,
-          maxHeight: dims.pageHeight,
           usePortrait: dims.isMobile
         });
       }
@@ -446,22 +432,18 @@
           flipbook.style.width = `${dims.spreadWidth}px`;
           flipbook.style.height = `${dims.spreadHeight}px`;
 
+          // 恢復原本不會飛的參數：size 設為 'stretch'，並移除會限制死的 min/max
           pageFlip = new St.PageFlip(flipbook, {
             width: dims.pageWidth,
             height: dims.pageHeight,
-            size: 'fixed',
-            minWidth: dims.pageWidth,
-            maxWidth: dims.pageWidth,
-            minHeight: dims.pageHeight,
-            maxHeight: dims.pageHeight,
+            size: 'stretch',
             maxShadowOpacity: 0.25,
-            showCover: true,          // 強制啟用封面獨立模式，解決封面/封底飛掉問題
-            mobileScrollSupport: false, // 關閉觸控預設滾動，防止上下滑動干擾
+            showCover: true,
+            mobileScrollSupport: false,
             clickEventForward: true,
             usePortrait: dims.isMobile,
             drawShadow: true,
             flippingTime: 400,
-            autoSize: false,
             startPage: 0
           });
 
