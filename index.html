@@ -17,11 +17,14 @@
       --muted: #a9b2bf;
     }
     * { box-sizing: border-box; }
-    html { min-height: 100%; }
-    body {
+    html, body {
       margin: 0;
-      min-height: 100vh;
-      min-height: 100dvh;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* 防止整個網頁上下捲動 */
+    }
+    body {
       color: var(--text);
       font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
       background:
@@ -30,7 +33,6 @@
         linear-gradient(145deg, #0b111a 0%, #172230 48%, #101721 100%);
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
     body::before {
       content: "";
@@ -44,67 +46,71 @@
       mask-image: linear-gradient(to bottom, black, transparent 85%);
     }
     .topbar {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1180px, calc(100% - 24px));
       margin: 0 auto;
-      padding: 12px 0 6px;
+      padding: 8px 0 4px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
       position: relative;
       z-index: 2;
+      flex-shrink: 0;
     }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .brand-mark {
-      width: 38px; height: 38px; flex: 0 0 38px;
+      width: 32px; height: 32px; flex: 0 0 32px;
       border: 1px solid rgba(217,193,138,.65);
-      border-radius: 11px;
+      border-radius: 9px;
       display: grid; place-items: center;
       color: var(--gold-bright);
       font-family: Georgia, serif;
-      font-size: 20px;
-      box-shadow: inset 0 0 18px rgba(217,193,138,.08), 0 0 22px rgba(217,193,138,.05);
+      font-size: 16px;
     }
-    .brand-title { font-size: 14px; letter-spacing: .16em; font-weight: 650; }
-    .brand-subtitle { margin-top: 4px; font-size: 10px; color: var(--muted); letter-spacing: .22em; }
-    .top-note { font-size: 11px; color: var(--muted); letter-spacing: .12em; }
-    .intro { text-align: center; padding: 5px 18px 0; position: relative; z-index: 1; }
+    .brand-title { font-size: 13px; letter-spacing: .16em; font-weight: 650; }
+    .brand-subtitle { margin-top: 2px; font-size: 9px; color: var(--muted); letter-spacing: .22em; }
+    .top-note { font-size: 10px; color: var(--muted); letter-spacing: .12em; }
+    
+    .intro { text-align: center; padding: 2px 10px; position: relative; z-index: 1; flex-shrink: 0; }
     .eyebrow {
-      color: var(--gold); font-size: 10px; letter-spacing: .38em;
-      text-transform: uppercase; margin-bottom: 11px;
+      color: var(--gold); font-size: 9px; letter-spacing: .38em;
+      text-transform: uppercase; margin-bottom: 4px;
     }
     h1 {
-      font-weight: 500; font-size: clamp(24px, 3vw, 36px);
+      font-weight: 500; font-size: clamp(20px, 2.5vw, 28px);
       letter-spacing: .18em; margin: 0; text-indent: .18em;
     }
-    .intro p { color: var(--muted); font-size: 12px; letter-spacing: .08em; margin: 12px 0 0; }
-    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 18px auto 0; }
-    .ornament::before, .ornament::after { content: ""; width: 38px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .intro p { color: var(--muted); font-size: 11px; letter-spacing: .08em; margin: 4px 0 0; }
+    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px auto 0; }
+    .ornament::before, .ornament::after { content: ""; width: 28px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
     .ornament::after { transform: scaleX(-1); }
-    .ornament span { width: 5px; height: 5px; transform: rotate(45deg); background: var(--gold); }
+    .ornament span { width: 4px; height: 4px; transform: rotate(45deg); background: var(--gold); }
     
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       width: 100%;
-      padding: 10px 16px 20px;
+      padding: 4px 8px 8px;
       position: relative;
       z-index: 1;
+      min-height: 0;
     }
     .reader-shell {
       width: 100%;
       max-width: 1280px;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
       border: 1px solid rgba(255,255,255,.055);
-      border-radius: 18px;
+      border-radius: 14px;
       background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
       box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
-      padding: 12px 14px 12px;
-      height: auto;
+      padding: 8px;
       min-height: 0;
       min-width: 0;
     }
@@ -117,38 +123,38 @@
       color: var(--muted);
       font-size: 11px;
       letter-spacing: .08em;
-      margin-bottom: 8px;
       padding: 0 4px;
+      flex-shrink: 0;
     }
     .live-status { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(217,193,138,.5); }
     
-    #loading-status { text-align: center; color: #d7c79f; font-size: 13px; padding: 70px 15px; }
+    #loading-status { text-align: center; color: #d7c79f; font-size: 13px; padding: 40px 15px; }
     .loader {
-      width: 28px; height: 28px; margin: 0 auto 17px; border-radius: 50%;
+      width: 24px; height: 24px; margin: 0 auto 12px; border-radius: 50%;
       border: 2px solid rgba(217,193,138,.18); border-top-color: var(--gold);
       animation: spin .8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     
     .book-stage {
+      flex: 1;
       width: 100%;
       display: flex;
-      align-items: flex-start; /* 手機版優先貼緊頂端 */
+      align-items: center;
       justify-content: center;
       position: relative;
-      /* 保留 12px 邊距供翻頁動畫與陰影順暢展現 */
-      padding: 12px 10px;
+      padding: 0;
       margin: 0 auto;
-      overflow: visible;
-      touch-action: pan-y;
+      overflow: hidden;
+      min-height: 0;
     }
     #flipbook {
       display: none;
       position: relative;
       z-index: 1;
       margin: 0 auto;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .page { background: #fff; overflow: hidden; }
     .page canvas { display: block; width: 100%; height: 100%; }
@@ -158,63 +164,43 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding-top: 12px;
-      margin-top: 6px;
+      gap: 6px;
+      padding-top: 6px;
       border-top: 1px solid rgba(255,255,255,.07);
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
     .control-btn {
-      min-width: 42px; height: 40px; padding: 0 14px;
-      border: 1px solid rgba(217,193,138,.25); border-radius: 11px;
+      min-width: 36px; height: 34px; padding: 0 10px;
+      border: 1px solid rgba(217,193,138,.25); border-radius: 9px;
       color: var(--text); background: rgba(255,255,255,.045);
-      font: inherit; font-size: 12px; cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      transition: background .2s, border-color .2s, transform .2s;
+      font: inherit; font-size: 11px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background .2s, border-color .2s;
     }
-    .control-btn:hover:not(:disabled) { background: rgba(217,193,138,.12); border-color: rgba(217,193,138,.6); transform: translateY(-1px); }
-    .control-btn:focus-visible, .page-input:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+    .control-btn:hover:not(:disabled) { background: rgba(217,193,138,.12); border-color: rgba(217,193,138,.6); }
     .control-btn:disabled { opacity: .32; cursor: not-allowed; }
     .control-btn.primary { color: #161b22; background: linear-gradient(135deg, #ead8a5, #c6a967); border-color: transparent; font-weight: 700; }
-    .page-readout { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .page-readout { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; white-space: nowrap; }
     .page-input {
-      width: 48px; height: 36px; text-align: center; color: var(--text);
-      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 8px;
-      font: inherit; font-size: 12px;
+      width: 42px; height: 32px; text-align: center; color: var(--text);
+      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 7px;
+      font: inherit; font-size: 11px;
     }
-    .progress-wrap { width: min(420px, 100%); height: 3px; background: rgba(255,255,255,.09); border-radius: 9px; margin: 8px auto 0; overflow: hidden; }
+    .progress-wrap { width: 100%; height: 2px; background: rgba(255,255,255,.09); border-radius: 9px; margin-top: 4px; overflow: hidden; flex-shrink: 0; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
-    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 7px; color: #7f8b9b; font-size: 10px; letter-spacing: .06em; }
-    footer { text-align: center; color: #718092; font-size: 10px; letter-spacing: .12em; padding: 12px 15px 20px; position: relative; z-index: 1; }
+    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 4px; color: #7f8b9b; font-size: 9px; letter-spacing: .06em; flex-shrink: 0; }
+    footer { text-align: center; color: #718092; font-size: 9px; letter-spacing: .12em; padding: 4px 10px 8px; flex-shrink: 0; }
     
-    body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none; }
-    body.reading-mode main { padding: 0; }
-    body.reading-mode .reader-shell { width: 100vw; height: 100dvh; border-radius: 0; border: none; padding: 8px 6px; justify-content: space-between; }
-    body.reading-mode .book-stage { flex: 1; align-items: center; }
-
+    body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none !important; }
+    body.reading-mode main { padding: 4px; }
+    body.reading-mode .reader-shell { border-radius: 0; border: none; padding: 4px; }
+    
     .error { color: #f1b5a9 !important; line-height: 1.8; }
     
     @media (max-width: 640px) {
-      .topbar { width: calc(100% - 20px); padding-top: 10px; }
       .top-note { display: none; }
-      .intro { padding-top: 5px; }
-      .eyebrow { margin-bottom: 6px; letter-spacing: .25em; }
-      h1 { font-size: 23px; }
-      .ornament { margin-top: 8px; }
-      .brand-mark { width: 32px; height: 32px; flex-basis: 32px; }
-      .brand-title { font-size: 12px; }
-      .brand-subtitle { font-size: 9px; }
-      .intro p { font-size: 11px; }
-      main { padding: 4px 6px 12px; }
-      .reader-shell { border-radius: 12px; padding: 8px 6px 8px; width: 100%; }
-      .reader-topline { font-size: 10px; margin-bottom: 4px; }
-      .book-stage { padding: 8px 6px; }
-      .controls { gap: 5px; padding-top: 8px; }
-      .control-btn { height: 36px; min-width: 36px; padding: 0 8px; border-radius: 8px; }
       .control-btn .btn-text { display: none; }
-      .page-readout { gap: 4px; font-size: 11px; }
-      .page-input { width: 38px; height: 32px; }
-      .bottomline { font-size: 9px; }
     }
   </style>
 </head>
@@ -263,7 +249,7 @@
       </div>
       <div class="progress-wrap" aria-label="閱讀進度"><div id="progress"></div></div>
       <div class="bottomline">
-        <span>左右滑動或拖曳可直接翻頁。</span>
+        <span>左右滑動或點擊按鈕翻頁。</span>
         <span>建議全螢幕體驗更佳</span>
       </div>
     </section>
@@ -299,14 +285,6 @@
       }
       pdfjsLib.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.js';
 
-      // 判斷是否為「純手機裝置」（排除 iPad 與 Tablet）
-      function isMobilePhone() {
-        const ua = navigator.userAgent.toLowerCase();
-        const isMobileUA = /iphone|ipod|android.*mobile|windows phone|blackberry/i.test(ua);
-        const isSmallScreen = window.innerWidth <= 640;
-        return isMobileUA || (isSmallScreen && !/ipad|tablet/i.test(ua));
-      }
-
       function showError(message) {
         loadingStatus.innerHTML = '';
         loadingStatus.classList.add('error');
@@ -334,50 +312,34 @@
         updateControls(target);
       }
 
+      // 嚴格計算符合 stage 內部的尺寸，確保「整頁一次性在畫面中顯示」
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
-        const isMobile = isMobilePhone();
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
         
-        // 考量適當的間距，預留像素讓翻頁動畫流暢
-        const stagePaddingX = isMobile ? 12 : 20;
-        const stagePaddingY = isMobile ? 16 : 24;
+        const availableWidth = Math.max(150, stage.clientWidth);
+        const availableHeight = Math.max(150, stage.clientHeight);
         
-        const availableWidth = Math.max(180, stage.clientWidth - stagePaddingX);
-        const isFullscreen = Boolean(document.fullscreenElement);
+        const baseAspect = baseWidth / baseHeight;
+        // 手機或直式：單頁比率；桌機：雙頁（寬度乘以 2）
+        const spreadAspect = isMobile ? baseAspect : (baseAspect * 2);
         
-        let singlePageWidth, singlePageHeight;
-
-        if (isMobile) {
-          // 手機版：貼緊上方/全螢幕可視區域高度 (Height Priority)
-          // 若全螢幕則依據可視螢幕扣除控制列高度，非全螢幕以 0.65 視窗高為基準
-          const maxAvailableHeight = isFullscreen 
-            ? (window.innerHeight - 130) 
-            : Math.min(window.innerHeight * 0.65, 550);
-            
-          const heightBasedWidth = Math.floor(maxAvailableHeight * (baseWidth / baseHeight));
-          
-          if (heightBasedWidth <= availableWidth) {
-            singlePageWidth = heightBasedWidth;
-            singlePageHeight = Math.floor(singlePageWidth * (baseHeight / baseWidth));
-          } else {
-            singlePageWidth = availableWidth;
-            singlePageHeight = Math.floor(singlePageWidth * (baseHeight / baseWidth));
-          }
-        } else {
-          // 電腦 / 平板：左右貼滿邊緣 (Width Priority) 雙頁模式
-          const spreadAspect = (baseWidth * 2) / baseHeight;
-          let targetSpreadWidth = availableWidth;
-          let targetSpreadHeight = Math.floor(targetSpreadWidth / spreadAspect);
-
-          singlePageWidth = Math.floor(targetSpreadWidth / 2);
-          singlePageHeight = targetSpreadHeight;
+        let targetWidth = availableWidth;
+        let targetHeight = targetWidth / spreadAspect;
+        
+        if (targetHeight > availableHeight) {
+          targetHeight = availableHeight;
+          targetWidth = targetHeight * spreadAspect;
         }
 
+        let singlePageWidth = isMobile ? targetWidth : (targetWidth / 2);
+        let singlePageHeight = targetHeight;
+
         return {
-          pageWidth: singlePageWidth,
-          pageHeight: singlePageHeight,
-          spreadWidth: isMobile ? singlePageWidth : singlePageWidth * 2,
-          spreadHeight: singlePageHeight,
+          pageWidth: Math.floor(singlePageWidth),
+          pageHeight: Math.floor(singlePageHeight),
+          spreadWidth: Math.floor(isMobile ? singlePageWidth : singlePageWidth * 2),
+          spreadHeight: Math.floor(singlePageHeight),
           isMobile
         };
       }
@@ -394,9 +356,10 @@
       fullscreenBtn.addEventListener('click', async () => {
         try {
           if (!document.fullscreenElement) {
-            await document.querySelector('.reader-shell').requestFullscreen();
-            document.body.classList.add('reading-mode');
-          } else await document.exitFullscreen();
+            await document.documentElement.requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
         } catch (error) {
           fullscreenBtn.title = '此瀏覽器不允許全螢幕模式';
         }
@@ -406,7 +369,7 @@
         const active = Boolean(document.fullscreenElement);
         document.body.classList.toggle('reading-mode', active);
         fullscreenBtn.innerHTML = active ? '⛶ <span class="btn-text">退出全螢幕</span>' : '⛶ <span class="btn-text">全螢幕</span>';
-        if (pdfBaseViewport && pageFlip) reInitFlipbook();
+        setTimeout(reInitFlipbook, 100);
       });
 
       document.addEventListener('keydown', event => {
@@ -496,7 +459,7 @@
             clickEventForward: true,
             usePortrait: dims.isMobile,
             drawShadow: true,
-            flippingTime: 500,
+            flippingTime: 400,
             autoSize: false,
             startPage: 0
           });
