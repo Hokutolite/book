@@ -44,7 +44,7 @@
       mask-image: linear-gradient(to bottom, black, transparent 85%);
     }
     .topbar {
-      width: min(1180px, calc(100% - 24px));
+      width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
       padding: 12px 0 6px;
       display: flex;
@@ -89,7 +89,7 @@
       flex-direction: column;
       align-items: center;
       width: 100%;
-      padding: 10px 12px 20px;
+      padding: 10px 16px 20px;
       position: relative;
       z-index: 1;
     }
@@ -103,8 +103,8 @@
       border-radius: 18px;
       background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
       box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
-      padding: 12px 10px 10px;
-      height: auto; /* 上下邊框跟著內容自動收縮 */
+      padding: 12px 14px 12px;
+      height: auto;
       min-height: 0;
       min-width: 0;
     }
@@ -118,7 +118,7 @@
       font-size: 11px;
       letter-spacing: .08em;
       margin-bottom: 8px;
-      padding: 0 6px;
+      padding: 0 4px;
     }
     .live-status { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(217,193,138,.5); }
@@ -134,20 +134,21 @@
     .book-stage {
       width: 100%;
       display: flex;
-      align-items: center;
+      align-items: flex-start; /* 手機版優先貼緊頂端 */
       justify-content: center;
       position: relative;
-      padding: 0;
+      /* 保留 12px 邊距供翻頁動畫與陰影順暢展現 */
+      padding: 12px 10px;
       margin: 0 auto;
-      overflow: hidden;
-      touch-action: pan-y; /* 允許垂直捲動，左右手勢留給翻頁 */
+      overflow: visible;
+      touch-action: pan-y;
     }
     #flipbook {
       display: none;
       position: relative;
       z-index: 1;
       margin: 0 auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.45);
     }
     .page { background: #fff; overflow: hidden; }
     .page canvas { display: block; width: 100%; height: 100%; }
@@ -159,7 +160,7 @@
       justify-content: center;
       gap: 8px;
       padding-top: 12px;
-      margin-top: 8px;
+      margin-top: 6px;
       border-top: 1px solid rgba(255,255,255,.07);
       flex-wrap: wrap;
     }
@@ -188,8 +189,9 @@
     
     body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none; }
     body.reading-mode main { padding: 0; }
-    body.reading-mode .reader-shell { width: 100vw; border-radius: 0; border: none; padding: 6px; }
-    
+    body.reading-mode .reader-shell { width: 100vw; height: 100dvh; border-radius: 0; border: none; padding: 8px 6px; justify-content: space-between; }
+    body.reading-mode .book-stage { flex: 1; align-items: center; }
+
     .error { color: #f1b5a9 !important; line-height: 1.8; }
     
     @media (max-width: 640px) {
@@ -203,9 +205,10 @@
       .brand-title { font-size: 12px; }
       .brand-subtitle { font-size: 9px; }
       .intro p { font-size: 11px; }
-      main { padding: 4px 0 12px; }
-      .reader-shell { border-radius: 10px; padding: 6px 4px 6px; width: 100%; }
+      main { padding: 4px 6px 12px; }
+      .reader-shell { border-radius: 12px; padding: 8px 6px 8px; width: 100%; }
       .reader-topline { font-size: 10px; margin-bottom: 4px; }
+      .book-stage { padding: 8px 6px; }
       .controls { gap: 5px; padding-top: 8px; }
       .control-btn { height: 36px; min-width: 36px; padding: 0 8px; border-radius: 8px; }
       .control-btn .btn-text { display: none; }
@@ -296,6 +299,14 @@
       }
       pdfjsLib.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.js';
 
+      // 判斷是否為「純手機裝置」（排除 iPad 與 Tablet）
+      function isMobilePhone() {
+        const ua = navigator.userAgent.toLowerCase();
+        const isMobileUA = /iphone|ipod|android.*mobile|windows phone|blackberry/i.test(ua);
+        const isSmallScreen = window.innerWidth <= 640;
+        return isMobileUA || (isSmallScreen && !/ipad|tablet/i.test(ua));
+      }
+
       function showError(message) {
         loadingStatus.innerHTML = '';
         loadingStatus.classList.add('error');
@@ -323,23 +334,44 @@
         updateControls(target);
       }
 
-      // 計算以「左右貼滿邊緣」為優先的單頁與整本寬高度
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
-        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const isMobile = isMobilePhone();
         
-        // 取得 container 目前的可用寬度（貼滿邊緣）
-        const availableWidth = Math.max(200, stage.clientWidth);
+        // 考量適當的間距，預留像素讓翻頁動畫流暢
+        const stagePaddingX = isMobile ? 12 : 20;
+        const stagePaddingY = isMobile ? 16 : 24;
         
-        // 電腦版雙頁 Spread (寬度x2)，手機版單頁 (寬度x1)
-        const spreadAspect = isMobile ? (baseWidth / baseHeight) : ((baseWidth * 2) / baseHeight);
+        const availableWidth = Math.max(180, stage.clientWidth - stagePaddingX);
+        const isFullscreen = Boolean(document.fullscreenElement);
         
-        let targetSpreadWidth = availableWidth;
-        let targetSpreadHeight = Math.floor(targetSpreadWidth / spreadAspect);
-        
-        // 單頁寬度
-        let singlePageWidth = isMobile ? targetSpreadWidth : Math.floor(targetSpreadWidth / 2);
-        let singlePageHeight = targetSpreadHeight;
+        let singlePageWidth, singlePageHeight;
+
+        if (isMobile) {
+          // 手機版：貼緊上方/全螢幕可視區域高度 (Height Priority)
+          // 若全螢幕則依據可視螢幕扣除控制列高度，非全螢幕以 0.65 視窗高為基準
+          const maxAvailableHeight = isFullscreen 
+            ? (window.innerHeight - 130) 
+            : Math.min(window.innerHeight * 0.65, 550);
+            
+          const heightBasedWidth = Math.floor(maxAvailableHeight * (baseWidth / baseHeight));
+          
+          if (heightBasedWidth <= availableWidth) {
+            singlePageWidth = heightBasedWidth;
+            singlePageHeight = Math.floor(singlePageWidth * (baseHeight / baseWidth));
+          } else {
+            singlePageWidth = availableWidth;
+            singlePageHeight = Math.floor(singlePageWidth * (baseHeight / baseWidth));
+          }
+        } else {
+          // 電腦 / 平板：左右貼滿邊緣 (Width Priority) 雙頁模式
+          const spreadAspect = (baseWidth * 2) / baseHeight;
+          let targetSpreadWidth = availableWidth;
+          let targetSpreadHeight = Math.floor(targetSpreadWidth / spreadAspect);
+
+          singlePageWidth = Math.floor(targetSpreadWidth / 2);
+          singlePageHeight = targetSpreadHeight;
+        }
 
         return {
           pageWidth: singlePageWidth,
@@ -383,7 +415,6 @@
         if (event.key === 'ArrowRight' && pageFlip) pageFlip.flipNext();
       });
 
-      // 當視窗縮放時自動重新適應貼邊與貼緊
       let resizeTimer = null;
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
@@ -391,7 +422,7 @@
           if (pdfBaseViewport && pageFlip) {
             reInitFlipbook();
           }
-        }, 200);
+        }, 150);
       });
 
       function reInitFlipbook() {
@@ -426,7 +457,6 @@
           const firstPage = await pdfDoc.getPage(1);
           pdfBaseViewport = firstPage.getViewport({ scale: 1 });
 
-          // Render 高清畫質
           const renderScale = Math.min(2.0, Math.max(1.25, (window.devicePixelRatio || 1) * 1.25));
 
           for (let n = 1; n <= totalPages; n++) {
@@ -462,7 +492,7 @@
             maxHeight: dims.pageHeight,
             maxShadowOpacity: 0.25,
             showCover: true,
-            mobileScrollSupport: true,  // 支援手機觸控滑動
+            mobileScrollSupport: true,
             clickEventForward: true,
             usePortrait: dims.isMobile,
             drawShadow: true,
