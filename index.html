@@ -22,7 +22,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden; /* 防止整個網頁上下捲動 */
+      overflow: hidden !important; /* 絕對禁止任何上下、左右捲動 */
     }
     body {
       color: var(--text);
@@ -48,7 +48,7 @@
     .topbar {
       width: min(1180px, calc(100% - 24px));
       margin: 0 auto;
-      padding: 8px 0 4px;
+      padding: 6px 0 2px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -59,32 +59,32 @@
     }
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .brand-mark {
-      width: 32px; height: 32px; flex: 0 0 32px;
+      width: 30px; height: 30px; flex: 0 0 30px;
       border: 1px solid rgba(217,193,138,.65);
-      border-radius: 9px;
+      border-radius: 8px;
       display: grid; place-items: center;
       color: var(--gold-bright);
       font-family: Georgia, serif;
-      font-size: 16px;
+      font-size: 15px;
     }
-    .brand-title { font-size: 13px; letter-spacing: .16em; font-weight: 650; }
-    .brand-subtitle { margin-top: 2px; font-size: 9px; color: var(--muted); letter-spacing: .22em; }
-    .top-note { font-size: 10px; color: var(--muted); letter-spacing: .12em; }
+    .brand-title { font-size: 12px; letter-spacing: .16em; font-weight: 650; }
+    .brand-subtitle { margin-top: 1px; font-size: 8px; color: var(--muted); letter-spacing: .22em; }
+    .top-note { font-size: 9px; color: var(--muted); letter-spacing: .12em; }
     
     .intro { text-align: center; padding: 2px 10px; position: relative; z-index: 1; flex-shrink: 0; }
     .eyebrow {
-      color: var(--gold); font-size: 9px; letter-spacing: .38em;
-      text-transform: uppercase; margin-bottom: 4px;
+      color: var(--gold); font-size: 8px; letter-spacing: .38em;
+      text-transform: uppercase; margin-bottom: 2px;
     }
     h1 {
-      font-weight: 500; font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 500; font-size: clamp(18px, 2.2vw, 24px);
       letter-spacing: .18em; margin: 0; text-indent: .18em;
     }
-    .intro p { color: var(--muted); font-size: 11px; letter-spacing: .08em; margin: 4px 0 0; }
-    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px auto 0; }
-    .ornament::before, .ornament::after { content: ""; width: 28px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .intro p { color: var(--muted); font-size: 10px; letter-spacing: .08em; margin: 2px 0 0; }
+    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 4px auto 0; }
+    .ornament::before, .ornament::after { content: ""; width: 24px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
     .ornament::after { transform: scaleX(-1); }
-    .ornament span { width: 4px; height: 4px; transform: rotate(45deg); background: var(--gold); }
+    .ornament span { width: 3px; height: 3px; transform: rotate(45deg); background: var(--gold); }
     
     main {
       flex: 1;
@@ -93,10 +93,11 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      padding: 4px 8px 8px;
+      padding: 4px 8px 6px;
       position: relative;
       z-index: 1;
       min-height: 0;
+      overflow: hidden;
     }
     .reader-shell {
       width: 100%;
@@ -107,12 +108,13 @@
       align-items: center;
       justify-content: space-between;
       border: 1px solid rgba(255,255,255,.055);
-      border-radius: 14px;
+      border-radius: 12px;
       background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
       box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
-      padding: 8px;
+      padding: 6px;
       min-height: 0;
       min-width: 0;
+      overflow: hidden;
     }
     .reader-topline {
       width: 100%;
@@ -121,17 +123,17 @@
       justify-content: space-between;
       gap: 12px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: .08em;
       padding: 0 4px;
       flex-shrink: 0;
     }
-    .live-status { display: flex; align-items: center; gap: 8px; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(217,193,138,.5); }
+    .live-status { display: flex; align-items: center; gap: 6px; }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px rgba(217,193,138,.5); }
     
-    #loading-status { text-align: center; color: #d7c79f; font-size: 13px; padding: 40px 15px; }
+    #loading-status { text-align: center; color: #d7c79f; font-size: 12px; padding: 30px 15px; }
     .loader {
-      width: 24px; height: 24px; margin: 0 auto 12px; border-radius: 50%;
+      width: 22px; height: 22px; margin: 0 auto 10px; border-radius: 50%;
       border: 2px solid rgba(217,193,138,.18); border-top-color: var(--gold);
       animation: spin .8s linear infinite;
     }
@@ -165,40 +167,40 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding-top: 6px;
+      padding-top: 4px;
       border-top: 1px solid rgba(255,255,255,.07);
       flex-wrap: wrap;
       flex-shrink: 0;
     }
     .control-btn {
-      min-width: 36px; height: 34px; padding: 0 10px;
-      border: 1px solid rgba(217,193,138,.25); border-radius: 9px;
+      min-width: 32px; height: 32px; padding: 0 8px;
+      border: 1px solid rgba(217,193,138,.25); border-radius: 8px;
       color: var(--text); background: rgba(255,255,255,.045);
       font: inherit; font-size: 11px; cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
       transition: background .2s, border-color .2s;
     }
     .control-btn:hover:not(:disabled) { background: rgba(217,193,138,.12); border-color: rgba(217,193,138,.6); }
     .control-btn:disabled { opacity: .32; cursor: not-allowed; }
     .control-btn.primary { color: #161b22; background: linear-gradient(135deg, #ead8a5, #c6a967); border-color: transparent; font-weight: 700; }
-    .page-readout { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .page-readout { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 11px; white-space: nowrap; }
     .page-input {
-      width: 42px; height: 32px; text-align: center; color: var(--text);
-      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 7px;
+      width: 38px; height: 30px; text-align: center; color: var(--text);
+      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 6px;
       font: inherit; font-size: 11px;
     }
-    .progress-wrap { width: 100%; height: 2px; background: rgba(255,255,255,.09); border-radius: 9px; margin-top: 4px; overflow: hidden; flex-shrink: 0; }
+    .progress-wrap { width: 100%; height: 2px; background: rgba(255,255,255,.09); border-radius: 9px; margin-top: 3px; overflow: hidden; flex-shrink: 0; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
-    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 4px; color: #7f8b9b; font-size: 9px; letter-spacing: .06em; flex-shrink: 0; }
-    footer { text-align: center; color: #718092; font-size: 9px; letter-spacing: .12em; padding: 4px 10px 8px; flex-shrink: 0; }
+    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 3px; color: #7f8b9b; font-size: 8px; letter-spacing: .06em; flex-shrink: 0; }
+    footer { text-align: center; color: #718092; font-size: 8px; letter-spacing: .12em; padding: 2px 10px 4px; flex-shrink: 0; }
     
     body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none !important; }
-    body.reading-mode main { padding: 4px; }
-    body.reading-mode .reader-shell { border-radius: 0; border: none; padding: 4px; }
+    body.reading-mode main { padding: 2px; }
+    body.reading-mode .reader-shell { border-radius: 0; border: none; padding: 2px; }
     
     .error { color: #f1b5a9 !important; line-height: 1.8; }
     
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .top-note { display: none; }
       .control-btn .btn-text { display: none; }
     }
@@ -312,16 +314,15 @@
         updateControls(target);
       }
 
-      // 嚴格計算符合 stage 內部的尺寸，確保「整頁一次性在畫面中顯示」
+      // 自動判斷是否為行動裝置或視窗過窄（小於 768px 或直式），強制切換為單頁模式避免雙頁跑版
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
-        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const isMobile = window.innerWidth < 768 || window.matchMedia('(orientation: portrait)').matches;
         
         const availableWidth = Math.max(150, stage.clientWidth);
         const availableHeight = Math.max(150, stage.clientHeight);
         
         const baseAspect = baseWidth / baseHeight;
-        // 手機或直式：單頁比率；桌機：雙頁（寬度乘以 2）
         const spreadAspect = isMobile ? baseAspect : (baseAspect * 2);
         
         let targetWidth = availableWidth;
