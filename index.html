@@ -22,7 +22,8 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden !important; /* 絕對禁止任何上下、左右捲動 */
+      overflow: hidden !important;
+      position: fixed; /* 徹底鎖死頁面，防止手機或桌機產生任何上下滑動 */
     }
     body {
       color: var(--text);
@@ -48,7 +49,7 @@
     .topbar {
       width: min(1180px, calc(100% - 24px));
       margin: 0 auto;
-      padding: 6px 0 2px;
+      padding: 4px 0 2px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -57,32 +58,32 @@
       z-index: 2;
       flex-shrink: 0;
     }
-    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .brand-mark {
-      width: 30px; height: 30px; flex: 0 0 30px;
+      width: 26px; height: 26px; flex: 0 0 26px;
       border: 1px solid rgba(217,193,138,.65);
-      border-radius: 8px;
+      border-radius: 6px;
       display: grid; place-items: center;
       color: var(--gold-bright);
       font-family: Georgia, serif;
-      font-size: 15px;
+      font-size: 13px;
     }
-    .brand-title { font-size: 12px; letter-spacing: .16em; font-weight: 650; }
-    .brand-subtitle { margin-top: 1px; font-size: 8px; color: var(--muted); letter-spacing: .22em; }
-    .top-note { font-size: 9px; color: var(--muted); letter-spacing: .12em; }
+    .brand-title { font-size: 11px; letter-spacing: .16em; font-weight: 650; }
+    .brand-subtitle { display: none; }
+    .top-note { font-size: 8px; color: var(--muted); letter-spacing: .12em; }
     
     .intro { text-align: center; padding: 2px 10px; position: relative; z-index: 1; flex-shrink: 0; }
     .eyebrow {
-      color: var(--gold); font-size: 8px; letter-spacing: .38em;
-      text-transform: uppercase; margin-bottom: 2px;
+      color: var(--gold); font-size: 7px; letter-spacing: .38em;
+      text-transform: uppercase; margin-bottom: 1px;
     }
     h1 {
-      font-weight: 500; font-size: clamp(18px, 2.2vw, 24px);
+      font-weight: 500; font-size: clamp(16px, 2vw, 22px);
       letter-spacing: .18em; margin: 0; text-indent: .18em;
     }
-    .intro p { color: var(--muted); font-size: 10px; letter-spacing: .08em; margin: 2px 0 0; }
-    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 4px auto 0; }
-    .ornament::before, .ornament::after { content: ""; width: 24px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .intro p { color: var(--muted); font-size: 9px; letter-spacing: .08em; margin: 1px 0 0; }
+    .ornament { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px auto 0; }
+    .ornament::before, .ornament::after { content: ""; width: 20px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
     .ornament::after { transform: scaleX(-1); }
     .ornament span { width: 3px; height: 3px; transform: rotate(45deg); background: var(--gold); }
     
@@ -93,7 +94,7 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      padding: 4px 8px 6px;
+      padding: 2px 6px 4px;
       position: relative;
       z-index: 1;
       min-height: 0;
@@ -108,10 +109,10 @@
       align-items: center;
       justify-content: space-between;
       border: 1px solid rgba(255,255,255,.055);
-      border-radius: 12px;
+      border-radius: 10px;
       background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
       box-shadow: 0 26px 90px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.035);
-      padding: 6px;
+      padding: 4px;
       min-height: 0;
       min-width: 0;
       overflow: hidden;
@@ -123,17 +124,17 @@
       justify-content: space-between;
       gap: 12px;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       letter-spacing: .08em;
       padding: 0 4px;
       flex-shrink: 0;
     }
-    .live-status { display: flex; align-items: center; gap: 6px; }
-    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px rgba(217,193,138,.5); }
+    .live-status { display: flex; align-items: center; gap: 5px; }
+    .status-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px rgba(217,193,138,.5); }
     
-    #loading-status { text-align: center; color: #d7c79f; font-size: 12px; padding: 30px 15px; }
+    #loading-status { text-align: center; color: #d7c79f; font-size: 11px; padding: 20px 15px; }
     .loader {
-      width: 22px; height: 22px; margin: 0 auto 10px; border-radius: 50%;
+      width: 20px; height: 20px; margin: 0 auto 8px; border-radius: 50%;
       border: 2px solid rgba(217,193,138,.18); border-top-color: var(--gold);
       animation: spin .8s linear infinite;
     }
@@ -166,33 +167,33 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding-top: 4px;
+      gap: 5px;
+      padding-top: 3px;
       border-top: 1px solid rgba(255,255,255,.07);
       flex-wrap: wrap;
       flex-shrink: 0;
     }
     .control-btn {
-      min-width: 32px; height: 32px; padding: 0 8px;
-      border: 1px solid rgba(217,193,138,.25); border-radius: 8px;
+      min-width: 30px; height: 28px; padding: 0 6px;
+      border: 1px solid rgba(217,193,138,.25); border-radius: 6px;
       color: var(--text); background: rgba(255,255,255,.045);
-      font: inherit; font-size: 11px; cursor: pointer;
+      font: inherit; font-size: 10px; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center; gap: 4px;
       transition: background .2s, border-color .2s;
     }
     .control-btn:hover:not(:disabled) { background: rgba(217,193,138,.12); border-color: rgba(217,193,138,.6); }
     .control-btn:disabled { opacity: .32; cursor: not-allowed; }
     .control-btn.primary { color: #161b22; background: linear-gradient(135deg, #ead8a5, #c6a967); border-color: transparent; font-weight: 700; }
-    .page-readout { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .page-readout { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 10px; white-space: nowrap; }
     .page-input {
-      width: 38px; height: 30px; text-align: center; color: var(--text);
-      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 6px;
-      font: inherit; font-size: 11px;
+      width: 34px; height: 26px; text-align: center; color: var(--text);
+      background: rgba(0,0,0,.22); border: 1px solid var(--line); border-radius: 5px;
+      font: inherit; font-size: 10px;
     }
-    .progress-wrap { width: 100%; height: 2px; background: rgba(255,255,255,.09); border-radius: 9px; margin-top: 3px; overflow: hidden; flex-shrink: 0; }
+    .progress-wrap { width: 100%; height: 2px; background: rgba(255,255,255,.09); border-radius: 9px; margin-top: 2px; overflow: hidden; flex-shrink: 0; }
     #progress { width: 0%; height: 100%; background: linear-gradient(90deg, #b89b5f, #f0dfb1); transition: width .25s ease; }
-    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 3px; color: #7f8b9b; font-size: 8px; letter-spacing: .06em; flex-shrink: 0; }
-    footer { text-align: center; color: #718092; font-size: 8px; letter-spacing: .12em; padding: 2px 10px 4px; flex-shrink: 0; }
+    .bottomline { display: flex; justify-content: space-between; gap: 12px; width: 100%; margin-top: 2px; color: #7f8b9b; font-size: 8px; letter-spacing: .06em; flex-shrink: 0; }
+    footer { text-align: center; color: #718092; font-size: 7px; letter-spacing: .12em; padding: 2px 10px 2px; flex-shrink: 0; }
     
     body.reading-mode .topbar, body.reading-mode .intro, body.reading-mode footer { display: none !important; }
     body.reading-mode main { padding: 2px; }
@@ -212,7 +213,6 @@
       <div class="brand-mark" aria-hidden="true">✦</div>
       <div>
         <div class="brand-title">GRADUATION ARCHIVE</div>
-        <div class="brand-subtitle">A BOOK OF OUR MEMORIES</div>
       </div>
     </div>
     <div class="top-note">MEMORIES · FRIENDSHIP · THE FUTURE</div>
@@ -314,7 +314,7 @@
         updateControls(target);
       }
 
-      // 自動判斷是否為行動裝置或視窗過窄（小於 768px 或直式），強制切換為單頁模式避免雙頁跑版
+      // 嚴格限制尺寸，確保手機單頁、桌機雙頁都能完美貼合容器且絕不超出
       function calculateSpreadDimensions(baseWidth, baseHeight) {
         const stage = document.querySelector('.book-stage');
         const isMobile = window.innerWidth < 768 || window.matchMedia('(orientation: portrait)').matches;
@@ -455,8 +455,8 @@
             minHeight: dims.pageHeight,
             maxHeight: dims.pageHeight,
             maxShadowOpacity: 0.25,
-            showCover: true,
-            mobileScrollSupport: true,
+            showCover: true,          // 強制啟用封面獨立模式，解決封面/封底飛掉問題
+            mobileScrollSupport: false, // 關閉觸控預設滾動，防止上下滑動干擾
             clickEventForward: true,
             usePortrait: dims.isMobile,
             drawShadow: true,
